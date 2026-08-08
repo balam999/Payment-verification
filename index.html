@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FAST PEY PAYMENT VERIFICATION</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
   <style>
     :root {
       --primary: #1e40af;
@@ -17,9 +13,15 @@
       --text-main: #0f172a;
       --text-muted: #64748b;
       --nagad-color: #f97316;
+      --bkash-color: #e2136e;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
 
     body {
       background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
@@ -51,63 +53,233 @@
       gap: 10px;
     }
 
-    .app-logo { width: 90px; height: auto; border-radius: 12px; background: white; padding: 4px; }
+    .app-logo {
+      width: 90px;
+      height: auto;
+      border-radius: 12px;
+      background: white;
+      padding: 4px;
+    }
+
     .header h1 { font-size: 18px; font-weight: 700; }
     .header p { font-size: 12px; opacity: 0.85; }
 
+    /* Step 1: Robot Verification */
     .step-section { padding: 25px 20px; }
-    .robot-title { font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 20px; text-align: center; }
+
+    .robot-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 20px;
+      text-align: center;
+    }
 
     .slider-container {
-      position: relative; width: 100%; height: 52px; background: #e2e8f0; border-radius: 30px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+      position: relative;
+      width: 100%;
+      height: 52px;
+      background: #e2e8f0;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
 
     .slider-text { font-size: 13px; font-weight: 600; color: #64748b; }
 
     .slider-btn {
-      position: absolute; left: 4px; top: 4px; width: 44px; height: 44px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: grab; z-index: 2;
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      width: 44px;
+      height: 44px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      cursor: grab;
+      z-index: 2;
     }
 
-    .slider-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: #93c5fd; border-radius: 30px; }
+    .slider-progress {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0%;
+      background: #93c5fd;
+      border-radius: 30px;
+    }
 
+    /* Step 2: Method Selection */
     .method-card {
-      border: 2px solid #fdba74; background: #fff7ed; border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+      border: 2px solid #cbd5e1;
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      margin-bottom: 14px;
+      transition: all 0.2s;
+    }
+
+    .method-card.nagad-card.selected {
+      border-color: var(--nagad-color);
+      background: #fff7ed;
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+    }
+
+    .method-card.bkash-card.selected {
+      border-color: var(--bkash-color);
+      background: #fdf2f8;
+      box-shadow: 0 0 0 3px rgba(226, 19, 110, 0.2);
     }
 
     .method-left { display: flex; align-items: center; gap: 12px; }
-    .nagad-logo-img { width: 45px; height: auto; border-radius: 6px; }
+    .method-logo-img { width: 45px; height: auto; border-radius: 6px; }
 
     .next-btn {
-      width: 100%; background: var(--nagad-color); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer;
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
     }
 
+    /* Step 3: Payment Gateway */
     .notice-box {
-      background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px; border-radius: 12px; font-size: 12px; text-align: center; margin-bottom: 16px; font-weight: 600;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      text-align: center;
+      margin-bottom: 16px;
+      font-weight: 600;
     }
 
-    .amount-badge { background: #eff6ff; border: 2px dashed #93c5fd; border-radius: 16px; padding: 12px; text-align: center; margin-bottom: 16px; }
+    .amount-badge {
+      background: #eff6ff;
+      border: 2px dashed #93c5fd;
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
     .amount-badge strong { font-size: 24px; color: var(--primary); }
 
-    .payment-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 16px; }
+    .payment-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
 
-    .copy-field { display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 10px 12px; }
-    .number-text { font-size: 17px; font-weight: 700; color: #0f172a; }
+    .copy-field {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
 
-    .copy-btn { background: var(--primary); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer; }
+    .number-text {
+      font-size: 17px;
+      font-weight: 700;
+      color: #0f172a;
+    }
 
-    .form-group input { width: 100%; padding: 12px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 14px; margin-top: 6px; margin-bottom: 16px; }
+    .copy-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+    }
 
-    .submit-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 14px;
+      margin-top: 6px;
+      margin-bottom: 16px;
+    }
 
-    .history-card { margin-top: 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; }
-    .history-item { background: #f8fafc; padding: 10px; border-radius: 8px; margin-top: 8px; font-size: 12px; }
+    .submit-btn {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
 
-    .status-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    .history-card {
+      margin-top: 20px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .history-item {
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    .status-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
     .status-Pending { background: #fef3c7; color: #b45309; }
     .status-Approved { background: #dcfce7; color: #15803d; }
     .status-Rejected { background: #fee2e2; color: #b91c1c; }
 
-    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #0f172a; color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; opacity: 0; transition: all 0.3s; z-index: 999; }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #0f172a;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 13px;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+    }
     .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
   </style>
 </head>
@@ -132,19 +304,34 @@
     </div>
   </div>
 
-  <!-- Step 2: Select Method -->
+  <!-- Step 2: Select Method (Nagad / bKash) -->
   <div class="step-section" id="stepMethod" style="display: none;">
     <div class="robot-title">পেমেন্ট মেথড সিলেক্ট করুন</div>
-    <div class="method-card">
+    
+    <!-- Nagad Option -->
+    <div class="method-card nagad-card selected" onclick="selectMethod('nagad')">
       <div class="method-left">
-        <img src="https://download.logo.wine/logo/Nagad/Nagad-Logo.wine.png" class="nagad-logo-img" alt="Nagad">
+        <img src="https://download.logo.wine/logo/Nagad/Nagad-Logo.wine.png" class="method-logo-img" alt="Nagad">
         <div>
           <strong style="font-size: 14px; color: #c2410c;">নগদ (Nagad)</strong>
-          <p style="font-size: 11px; color: #64748b;">ক্যাশ আউট/সেন্ড মানি</p>
+          <p style="font-size: 11px; color: #64748b;">সেন্ড মানি করবেন </p>
         </div>
       </div>
-      <input type="radio" checked style="accent-color: #f97316;">
+      <input type="radio" name="paymentMethod" id="radioNagad" value="nagad" checked style="accent-color: #f97316;">
     </div>
+
+    <!-- bKash Option -->
+    <div class="method-card bkash-card" onclick="selectMethod('bkash')">
+      <div class="method-left">
+        <img src="https://download.logo.wine/logo/BKash/BKash-bKash-Logo.wine.png" class="method-logo-img" alt="bKash">
+        <div>
+          <strong style="font-size: 14px; color: #be185d;">বিকাশ (bKash)</strong>
+          <p style="font-size: 11px; color: #64748b;">সেন্ড মানি করবেন </p>
+        </div>
+      </div>
+      <input type="radio" name="paymentMethod" id="radioBkash" value="bkash" style="accent-color: #e2136e;">
+    </div>
+
     <button class="next-btn" onclick="goToPayment()">নেক্সট (Next) ➔</button>
   </div>
 
@@ -160,9 +347,9 @@
     </div>
 
     <div class="payment-box">
-      <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">নগদ পার্সোনাল নম্বর</div>
+      <div style="font-size: 12px; font-weight: 600; margin-bottom: 8px;" id="paymentLabel">পার্সোনাল নম্বর</div>
       <div class="copy-field">
-        <input type="text" id="nagadNumberInput" value="01327789835" readonly class="number-text" style="border:none; outline:none; background:transparent; width:120px;">
+        <input type="text" id="paymentNumberInput" value="" readonly class="number-text" style="border:none; outline:none; background:transparent; width:130px;">
         <button class="copy-btn" id="copyBtn" onclick="forceCopy()">কপি করুন</button>
       </div>
     </div>
@@ -172,7 +359,7 @@
         <label style="font-size: 12px; font-weight: 600;">ট্রানজেকশন আইডি (TrxID)</label>
         <input type="text" id="trxId" placeholder="যেমন: 7N82A9X1" required autocomplete="off">
       </div>
-      <button type="submit" class="submit-btn" id="subBtn">পেমেন্ট ভেরিফাই করুন</button>
+      <button type="submit" class="submit-btn">পেমেন্ট ভেরিফাই করুন</button>
     </form>
 
     <div class="history-card">
@@ -185,26 +372,25 @@
 <div class="toast" id="toast">নম্বর কপি হয়েছে!</div>
 
 <script>
-  // 🔴 Firebase Setup (এখানে আপনার Firebase Config কোড বসাবেন)
-  const firebaseConfig = {
-  apiKey: "AIzaSyDUmIUrSLNh9pRw80NBdOeYZIbTBiXcmSk",
-  authDomain: "earning-app-76383.firebaseapp.com",
-  databaseURL: "https://earning-app-76383-default-rtdb.firebaseio.com",
-  projectId: "earning-app-76383",
-  storageBucket: "earning-app-76383.firebasestorage.app",
-  messagingSenderId: "451327583556",
-  appId: "1:451327583556:web:3488f0dfd4f46811156311",
-  measurementId: "G-4H9ZLJR9KW"
-};
+  // Selected payment method store
+  let selectedMethod = 'nagad';
+  const methodData = {
+    nagad: {
+      label: 'নগদ পার্সোনাল নম্বর',
+      number: '01327789835'
+    },
+    bkash: {
+      label: 'বিকাশ পার্সোনাল নম্বর',
+      number: '01721972119'
+    }
+  };
 
-  firebase.initializeApp(firebaseConfig);
-  const database = firebase.database();
-
-  // Slider Logic
+  // 1. Robot Slider Logic
   const sliderBtn = document.getElementById('sliderBtn');
   const sliderContainer = document.getElementById('sliderContainer');
   const sliderProgress = document.getElementById('sliderProgress');
   const sliderText = document.getElementById('sliderText');
+
   let isDragging = false, startX = 0, maxSlide = 0;
 
   function initSlider() { maxSlide = sliderContainer.offsetWidth - sliderBtn.offsetWidth - 8; }
@@ -249,17 +435,41 @@
     sliderProgress.style.width = '0%';
   }
 
+  // Method Selection Handler
+  function selectMethod(method) {
+    selectedMethod = method;
+    const nagadCard = document.querySelector('.nagad-card');
+    const bkashCard = document.querySelector('.bkash-card');
+
+    if (method === 'nagad') {
+      nagadCard.classList.add('selected');
+      bkashCard.classList.remove('selected');
+      document.getElementById('radioNagad').checked = true;
+    } else {
+      bkashCard.classList.add('selected');
+      nagadCard.classList.remove('selected');
+      document.getElementById('radioBkash').checked = true;
+    }
+  }
+
   function goToPayment() {
     document.getElementById('stepMethod').style.display = 'none';
     document.getElementById('stepPayment').style.display = 'block';
-    listenRealtimeData();
+
+    // Set number & label according to choice
+    document.getElementById('paymentLabel').innerText = methodData[selectedMethod].label;
+    document.getElementById('paymentNumberInput').value = methodData[selectedMethod].number;
+
+    loadHistory();
   }
 
-  // Copy Logic
+  // 2. Ultra-Reliable Force Copy Logic
   function forceCopy() {
-    const inputField = document.getElementById('nagadNumberInput');
+    const inputField = document.getElementById('paymentNumberInput');
+    
     inputField.select();
     inputField.setSelectionRange(0, 99999);
+
     try {
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(inputField.value);
@@ -267,6 +477,15 @@
         document.execCommand('copy');
       }
       showToast("নম্বর কপি করা হয়েছে!");
+      
+      const copyBtn = document.getElementById('copyBtn');
+      copyBtn.innerText = "কপি হয়েছে!";
+      copyBtn.style.background = "#22c55e";
+      setTimeout(() => {
+        copyBtn.innerText = "কপি করুন";
+        copyBtn.style.background = "var(--primary)";
+      }, 2000);
+
     } catch (err) {
       showToast("ম্যানুয়ালি কপি করুন");
     }
@@ -279,62 +498,63 @@
     setTimeout(() => toast.classList.remove('show'), 2500);
   }
 
-  // Submit to Firebase
+  // 3. Submit Data & Storage
   function submitPayment(e) {
     e.preventDefault();
     const trxId = document.getElementById('trxId').value.trim();
     if(!trxId) return;
 
-    document.getElementById('subBtn').disabled = true;
-    document.getElementById('subBtn').innerText = "সাবমিট হচ্ছে...";
-
-    const newRef = database.ref('payments').push();
-    newRef.set({
+    const newRequest = {
+      id: Date.now(),
+      method: selectedMethod.toUpperCase(),
       amount: '৫০ টাকা',
       trxId: trxId,
       status: 'Pending',
-      rejectReason: '',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      timestamp: Date.now()
-    }).then(() => {
-      showToast("পেন্ডিং লিস্টে পাঠানো হয়েছে!");
-      document.getElementById('trxId').value = '';
-      document.getElementById('subBtn').disabled = false;
-      document.getElementById('subBtn').innerText = "পেমেন্ট ভেরিফাই করুন";
-    });
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    let requests = JSON.parse(localStorage.getItem('fastpay_requests')) || [];
+    requests.push(newRequest);
+    localStorage.setItem('fastpay_requests', JSON.stringify(requests));
+
+    showToast("রিকোয়েস্ট পাঠানো হয়েছে!");
+    document.getElementById('trxId').value = '';
+    loadHistory();
   }
 
-  // Realtime Listener from Firebase
-  function listenRealtimeData() {
-    database.ref('payments').on('value', snapshot => {
-      const historyList = document.getElementById('historyList');
-      const data = snapshot.val();
-      
-      if(!data) {
-        historyList.innerHTML = `<div style="font-size:11px; color:#94a3b8; margin-top:6px;">কোন তথ্য পাওয়া যায়নি</div>`;
-        return;
-      }
+  function loadHistory() {
+    const historyList = document.getElementById('historyList');
+    const requests = JSON.parse(localStorage.getItem('fastpay_requests')) || [];
 
-      const arr = Object.values(data).reverse();
-      historyList.innerHTML = arr.map(item => {
-        let statusMsg = "";
-        if(item.status === 'Pending') statusMsg = "আপনার পেমেন্ট এডমিন রিভিউ করছে...";
-        else if(item.status === 'Approved') statusMsg = "🎉 আপনার পেমেন্ট এপ্রুভ করা হয়েছে! Fast Pey থেকে ১-২ মিনিটের মধ্যে ব্যালেন্স যোগ হয়ে যাবে।";
-        else if(item.status === 'Rejected') statusMsg = `❌ রিজেক্ট করা হয়েছে। কারণ: ${item.rejectReason || 'ভুল তথ্য'}`;
+    if(requests.length === 0) {
+      historyList.innerHTML = `<div style="font-size:11px; color:#94a3b8; margin-top:6px;">কোন তথ্য পাওয়া যায়নি</div>`;
+      return;
+    }
 
-        return `
-          <div class="history-item">
-            <div style="display:flex; justify-content:space-between; font-weight:700;">
-              <span>TrxID: ${item.trxId}</span>
-              <span class="status-badge status-${item.status}">${item.status}</span>
-            </div>
-            <p style="margin-top:4px; color:#334155;">${statusMsg}</p>
+    historyList.innerHTML = requests.slice().reverse().map(item => {
+      let statusMsg = "";
+      if(item.status === 'Pending') statusMsg = "পেমেন্ট প্রসেসিংয়ে আছে...";
+      else if(item.status === 'Approved') statusMsg = "🎉 আপনার পেমেন্ট এপ্রুভ করা হয়েছে! Fast Pey থেকে ১-২ মিনিটের মধ্যে ব্যালেন্স যোগ হয়ে যাবে।";
+      else if(item.status === 'Rejected') statusMsg = "❌ সঠিক তথ্য পাওয়া যায়নি।";
+
+      const methodTag = item.method ? `(${item.method})` : '';
+
+      return `
+        <div class="history-item">
+          <div style="display:flex; justify-content:space-between; font-weight:700;">
+            <span>TrxID: ${item.trxId} <small style="color:#64748b">${methodTag}</small></span>
+            <span class="status-badge status-${item.status}">${item.status}</span>
           </div>
-        `;
-      }).join('');
-    });
+          <p style="margin-top:4px; color:#334155;">${statusMsg}</p>
+        </div>
+      `;
+    }).join('');
   }
+
+  setInterval(() => {
+    if(document.getElementById('stepPayment').style.display === 'block') loadHistory();
+  }, 3000);
 </script>
 
 </body>
-  </html>
+</html>
